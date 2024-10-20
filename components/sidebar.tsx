@@ -28,11 +28,11 @@ export const Sidebar = ({className }: Props) => {
                     iconSrc="/learn.svg"/>
                     <SidebarItem 
                     label="leaderboards" 
-                    href="/leaderboards" 
+                    href="/leaderboard" 
                     iconSrc="/leaderboard.svg"/>
                      <SidebarItem 
                     label="quest" 
-                    href="/quest" 
+                    href="/quests" 
                     iconSrc="/quest.svg"/>
                     <SidebarItem 
                     label="shop" 
