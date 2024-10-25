@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { Promo } from "@/components/promo";
+
 import { Quests } from "@/components/quests";
 import { FeedWrapper } from "@/components/feed-wrapper";
 import { UserProgress } from "@/components/user-progress";
