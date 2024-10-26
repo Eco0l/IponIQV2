@@ -1,5 +1,4 @@
 import { cn } from "@/lib/utils";
-import { timeLog } from "console";
 import { Check } from "lucide-react";
 import Image from "next/image";
 

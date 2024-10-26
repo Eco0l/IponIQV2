@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { InfinityIcon, X } from "lucide-react";
+import {  X } from "lucide-react";
 
 import { Progress } from "@/components/ui/progress";
 import { useExitModal } from "../store/use-exit-modal";
