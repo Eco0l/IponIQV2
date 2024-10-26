@@ -52,12 +52,12 @@ export const Quiz = ({
   const [finishAudio] = useAudio({ src: "/finish.mp3", autoPlay: true });
   const [
     correctAudio,
-    _c,
+    ,
     correctControls,
   ] = useAudio({ src: "/correct.wav" });
   const [
     incorrectAudio,
-    _i,
+    ,
     incorrectControls,
   ] = useAudio({ src: "/incorrect.wav" });
   const [pending, startTransition] = useTransition();
@@ -115,7 +115,7 @@ export const Quiz = ({
       startTransition(() => {
         upsertChallengeProgress(challenge.id)
           .then((response) => {
-            //@ts-expect-error
+            //@ts-expect-error: There is an error here
             if (response?.error === "hearts") {
               openHeartsModal();
               return;
