@@ -1,5 +1,5 @@
 // src/components/profile/LessonProgress.tsx
-import { Progress } from "@/components/ui/Progress";
+import { Progress } from "@/components/ui/progress";
 
 interface LessonProgressProps {
   percentage: number;

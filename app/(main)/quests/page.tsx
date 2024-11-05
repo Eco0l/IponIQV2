@@ -5,7 +5,7 @@ import { FeedWrapper } from "@/components/feed-wrapper";
 import { UserProgress } from "@/components/user-progress";
 import { StickyWrapper } from "@/components/stick-wrapper";
 import { getUserProgress } from "@/db/queries";
-import { Progress } from "@/components/ui/Progress";
+import { Progress } from "@/components/ui/progress";
 import { quests } from "@/app/store/constants";
 
 const QuestsPage = async () => {

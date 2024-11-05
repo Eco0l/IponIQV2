@@ -3,7 +3,7 @@ import Image from "next/image";
 
 import { quests } from "@/app/store/constants";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/Progress";
+import { Progress } from "@/components/ui/progress";
 
 type Props = {
   points: number;
