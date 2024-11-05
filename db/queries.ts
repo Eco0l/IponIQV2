@@ -1,5 +1,5 @@
 import { cache } from "react";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 
 import db from "@/db/drizzle";
@@ -107,6 +107,8 @@ export const getCourseById = cache(async (courseId: number) => {
   return data;
 });
 
+
+
 export const getCourseProgress = cache(async () => {
   const { userId } = await auth();
   const userProgress = await getUserProgress();
@@ -115,14 +117,13 @@ export const getCourseProgress = cache(async () => {
     return null;
   }
 
+  // Get units and lessons for the active course and calculate lessonsCompleted
   const unitsInActiveCourse = await db.query.units.findMany({
     orderBy: (units, { asc }) => [asc(units.order)],
     where: eq(units.courseId, userProgress.activeCourseId),
     with: {
       lessons: {
-        orderBy: (lessons, { asc }) => [asc(lessons.order)],
         with: {
-          unit: true,
           challenges: {
             with: {
               challengeProgress: {
@@ -135,21 +136,27 @@ export const getCourseProgress = cache(async () => {
     },
   });
 
-  const firstUncompletedLesson = unitsInActiveCourse
-    .flatMap((unit) => unit.lessons)
+  const lessonsCompleted = unitsInActiveCourse.flatMap(unit => unit.lessons)
+    .filter(lesson => lesson.challenges.every(challenge => 
+      challenge.challengeProgress?.every(progress => progress.completed)
+    )).length;
+
+  const firstUncompletedLesson = unitsInActiveCourse.flatMap((unit) => unit.lessons)
     .find((lesson) => {
       return lesson.challenges.some((challenge) => {
-        return !challenge.challengeProgress 
-          || challenge.challengeProgress.length === 0 
-          || challenge.challengeProgress.some((progress) => progress.completed === false)
+        return !challenge.challengeProgress
+          || challenge.challengeProgress.length === 0
+          || challenge.challengeProgress.some((progress) => progress.completed === false);
       });
     });
 
   return {
     activeLesson: firstUncompletedLesson,
     activeLessonId: firstUncompletedLesson?.id,
+    lessonsCompleted, // Make sure lessonsCompleted is included here
   };
 });
+
 
 export const getLesson = cache(async (id?: number) => {
   const { userId } = await auth();
