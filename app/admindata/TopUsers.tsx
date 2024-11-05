@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { User } from "lucide-react";  // Import User icon from lucide-react
+import Image from "next/image";
 
 interface User {
     userId: string;
@@ -28,7 +28,7 @@ const TopUsers = () => {
     return (
         <div className="p-6 bg-gray-50 rounded-lg shadow-md">
             <h2 className="text-2xl font-semibold text-gray-700 mb-4 flex items-center gap-2">
-                <User className="w-6 h-6 text-yellow-500" />
+                <span className="text-yellow-500 text-lg font-bold">🏆</span>
                 Top 10 Users by Points
             </h2>
             <ul className="space-y-4">
@@ -38,10 +38,12 @@ const TopUsers = () => {
                         className="flex items-center gap-4 p-4 bg-white rounded-lg shadow-sm"
                     >
                         <span className="text-lg font-bold text-gray-700">{index + 1}.</span>
-                        <img 
+                        <Image 
                             src={user.userImageSrc} 
                             alt={`${user.userName}'s avatar`} 
-                            className="w-10 h-10 rounded-full border-2 border-yellow-500"
+                            width={40}
+                            height={40}
+                            className="rounded-full border-2 border-yellow-500"
                         />
                         <div className="flex-1">
                             <p className="text-lg font-medium text-gray-800">{user.userName}</p>
