@@ -1,7 +1,9 @@
-"use client"
+"use client";
 import React, { useState, useEffect } from "react";
 import { Clock } from "lucide-react";
 import Link from "next/link";
+
+
 interface Question {
   question: string;
   options: string[];
@@ -112,93 +114,111 @@ const questions: Question[] = [
 ];
 
 const PreTest: React.FC = () => {
-    const [currentQuestion, setCurrentQuestion] = useState(0);
-    const [timeLeft, setTimeLeft] = useState(15);
-    const [selectedOption, setSelectedOption] = useState<number | null>(null);
-    const [showResult, setShowResult] = useState(false);
-    const [correctAnswers, setCorrectAnswers] = useState(0);
-  
-    useEffect(() => {
-      if (timeLeft > 0) {
-        const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
-        return () => clearTimeout(timer);
-      }
-    }, [timeLeft]);
-  
-    const handleOptionSelect = (index: number) => {
-      // Update the score if the answer is correct
-      if (index === questions[currentQuestion].correct) {
-        setCorrectAnswers(correctAnswers + 1);
-      }
-  
-      setSelectedOption(index);
-  
-      // Move to the next question after a short delay
-      setTimeout(() => {
-        if (currentQuestion + 1 < questions.length) {
-          setCurrentQuestion(currentQuestion + 1);
-          setTimeLeft(15);
-          setSelectedOption(null);
-        } else {
-          setShowResult(true);
-        }
-      }, 1000);
-    };
-  
-    const getFeedbackMessage = () => {
-      if (correctAnswers < 5) {
-        return "Start from scratch.";
-      } else if (correctAnswers > 8) {
-        return "You know the Basics!";
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(15);
+  const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [showResult, setShowResult] = useState(false);
+  const [correctAnswers, setCorrectAnswers] = useState(0);
+
+  useEffect(() => {
+    if (timeLeft > 0) {
+      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [timeLeft]);
+
+  const handleOptionSelect = (index: number) => {
+    // Update the correctAnswers using the functional update form
+    if (index === questions[currentQuestion].correct) {
+      setCorrectAnswers(prev => prev + 1);
+    }
+    setSelectedOption(index);
+
+    setTimeout(() => {
+      if (currentQuestion + 1 < questions.length) {
+        setCurrentQuestion(currentQuestion + 1);
+        setTimeLeft(15);
+        setSelectedOption(null);
       } else {
-        return "Start with books recommended by experts!";
+        setShowResult(true);  // Show result after the last question
       }
+    }, 1000);
+  };
+
+  useEffect(() => {
+    const saveResult = async () => {
+      let title: "Beginner" | "Knowledgeable" = "Beginner";
+      if (correctAnswers > 8) {
+        title = "Knowledgeable";
+      } else if (correctAnswers >= 5) {
+        title = "Beginner";
+      }
+  
+      // Make an API call to save the result (score and title)
+      await fetch("/api/saveUserInitial", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ score: correctAnswers, title }),
+      });
     };
   
-    return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gray-100 p-4">
-        {showResult ? (
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-green-600">Test Complete!</h1>
-            <p className="text-lg">Thank you for participating.</p>
-            <p className="text-lg font-semibold mt-4">{getFeedbackMessage()}</p>
-            <Link href="/courses">
-              <button className="mt-6 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
-                Proceed to Courses
+    if (showResult) {
+      saveResult();  // Save the result when the test is complete
+    }
+  }, [showResult, correctAnswers]);  // Correct dependencies for showResult and correctAnswers
+
+  return (
+    <div className="flex flex-col items-center justify-center h-screen bg-gray-100 p-4">
+      {showResult ? (
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-green-600">Test Complete!</h1>
+          <p className="text-lg">Thank you for participating.</p>
+          <p className="text-lg font-semibold mt-4">
+            {correctAnswers < 5
+              ? "Start from scratch."
+              : correctAnswers > 8
+              ? "You know the Basics!"
+              : "Start with books recommended by experts!"}
+          </p>
+          <Link href="/courses">
+            <button className="mt-6 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+              Proceed to Courses
+            </button>
+          </Link>
+        </div>
+      ) : (
+        <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-2xl">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold">Question {currentQuestion + 1} of {questions.length}</h2>
+            <div className="flex items-center space-x-2 text-red-500">
+              <Clock className="w-5 h-5" />
+              <span>{timeLeft}s</span>
+            </div>
+          </div>
+          <p className="text-gray-700 text-md mb-6">{questions[currentQuestion].question}</p>
+          <div className="space-y-4">
+            {questions[currentQuestion].options.map((option, index) => (
+              <button
+                key={index}
+                className={`w-full text-left p-4 border rounded-lg ${
+                  selectedOption === index
+                    ? index === questions[currentQuestion].correct
+                      ? "bg-green-100 border-green-500"
+                      : "bg-red-100 border-red-500"
+                    : "hover:bg-gray-100"
+                }`}
+                onClick={() => handleOptionSelect(index)}
+              >
+                {option}
               </button>
-            </Link>
+            ))}
           </div>
-        ) : (
-          <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-2xl">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold">Question {currentQuestion + 1} of {questions.length}</h2>
-              <div className="flex items-center space-x-2 text-red-500">
-                <Clock className="w-5 h-5" />
-                <span>{timeLeft}s</span>
-              </div>
-            </div>
-            <p className="text-gray-700 text-md mb-6">{questions[currentQuestion].question}</p>
-            <div className="space-y-4">
-              {questions[currentQuestion].options.map((option, index) => (
-                <button
-                  key={index}
-                  className={`w-full text-left p-4 border rounded-lg ${
-                    selectedOption === index
-                      ? index === questions[currentQuestion].correct
-                        ? "bg-green-100 border-green-500"
-                        : "bg-red-100 border-red-500"
-                      : "hover:bg-gray-100"
-                  }`}
-                  onClick={() => handleOptionSelect(index)}
-                >
-                  {option}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
-  
-  export default PreTest;
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default PreTest;

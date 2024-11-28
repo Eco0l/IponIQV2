@@ -1,14 +1,31 @@
-"use client"; 
-import { useState } from "react"; 
-import Link from "next/link"; // Importing Link from next/link
+"use client";
+import { useState } from "react";
+import Link from "next/link";
 import { User, Briefcase } from "lucide-react";
 
 const Page = () => {
   const [showKnowledgePrompt, setShowKnowledgePrompt] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Handle the choice between Student or Employee
-  const handleChoice = () => {
-    setShowKnowledgePrompt(true); // Show the "Wanna gauge your knowledge?" question
+  const handleChoice = async (profile: "Student" | "Employee") => {
+    try {
+      const response = await fetch("/api/profiling", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ profile }),
+      });
+
+      if (response.ok) {
+        setShowKnowledgePrompt(true); // Show the "Wanna gauge your knowledge?" question
+      } else {
+        setError("Failed to save your profile. Please try again.");
+      }
+    } catch (err) {
+      setError("Failed to save your profile. Please try again.");
+      console.error(err);
+    }
   };
 
   return (
@@ -19,16 +36,17 @@ const Page = () => {
             <h1 className="text-2xl font-bold text-gray-800 mb-6">
               Are you a Student or an Employee?
             </h1>
+            {error && <p className="text-red-500">{error}</p>}
             <div className="space-y-4">
               <button
-                onClick={handleChoice}
+                onClick={() => handleChoice("Student")}
                 className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 focus:ring-2 focus:ring-blue-300 focus:ring-offset-2 transition-all"
               >
                 <User className="w-5 h-5" />
                 I am a Student
               </button>
               <button
-                onClick={handleChoice}
+                onClick={() => handleChoice("Employee")}
                 className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-green-500 text-white rounded-lg shadow-md hover:bg-green-600 focus:ring-2 focus:ring-green-300 focus:ring-offset-2 transition-all"
               >
                 <Briefcase className="w-5 h-5" />

@@ -7,7 +7,9 @@ import {
   challengeProgress,
   courses, 
   lessons, 
+  profiling, 
   units, 
+  userInitial, 
   userProgress,
 } from "@/db/schema";
 import { auth } from "@clerk/nextjs/server";
@@ -245,4 +247,90 @@ export const getTopTenUsers = cache(async () => {
   });
 
   return data;
+});
+export const saveUserProfile = cache(async (profile: "Student" | "Employee") => {
+  const { userId } = await auth();
+
+  if (!userId) {
+    throw new Error("User not authenticated");
+  }
+
+  // Check if the profile already exists
+  const existingProfile = await db.query.profiling.findFirst({
+    where: eq(profiling.userId, userId),
+  });
+
+  if (existingProfile) {
+    // Update the profile if it already exists
+    await db
+      .update(profiling)
+      .set({ profile })
+      .where(eq(profiling.userId, userId));
+  } else {
+    // Insert a new profile
+    await db.insert(profiling).values({
+      userId,
+      profile,
+      name: "User Name", // Replace with actual name from Clerk or elsewhere
+    });
+  }
+});
+
+export const getProfiling = cache(async () => {
+  const { userId } = await auth();
+
+  if (!userId) {
+    return null; // If user is not authenticated, return null
+  }
+
+  // Fetch profiling data for the authenticated user
+  const data = await db.query.profiling.findFirst({
+    where: eq(profiling.userId, userId),
+  });
+
+  return data; // Return the profiling data
+});
+
+export const saveUserInitial = cache(async (score: number, title: "Beginner" | "Knowledgeable") => {
+  const { userId } = await auth();
+
+  if (!userId) {
+    throw new Error("User not authenticated");
+  }
+
+  // Check if the user already has an entry in userInitial
+  const existingUserInitial = await db.query.userInitial.findFirst({
+    where: eq(userInitial.userId, userId),
+  });
+
+  if (existingUserInitial) {
+    // Update the existing entry
+    await db
+      .update(userInitial)
+      .set({ score, title })
+      .where(eq(userInitial.userId, userId));
+  } else {
+    // Insert a new record if none exists
+    await db.insert(userInitial).values({
+      userId,
+      score,
+      title,
+    });
+  }
+});
+
+export const getUserInitial = cache(async () => {
+  const { userId } = await auth();
+
+  if (!userId) {
+    return null; // If user is not authenticated, return null
+  }
+
+  // Fetch the userInitial data for the authenticated user
+  const data = await db.query.userInitial.findFirst({
+    where: eq(userInitial.userId, userId),
+  });
+
+  // Return score and title if found
+  return data ? { score: data.score, title: data.title } : null;
 });

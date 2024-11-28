@@ -111,3 +111,32 @@ export const userProgressRelations = relations(userProgress, ({ one }) =>
     }),
 }));
 
+export const profiling = pgTable("profiling", {
+    id: serial("id").primaryKey(),
+    userId: text("userId").notNull(), // Clerk user ID
+    name: text("name").notNull(), // User's name
+    profile: text("profile").notNull(), // "Student" or "Employee"
+  });
+  
+  export const profilingRelations = relations(profiling, ({ one }) => ({
+    user: one(userProgress, {
+      fields: [profiling.userId],
+      references: [userProgress.userId],
+    }),
+  }));
+
+  export const userInitial = pgTable("user_initial", {
+    id: serial("id").primaryKey(), // Primary key for the UserInitial record
+    userId: text("user_id").notNull(), // Reference to the user (same as in userProgress table)
+    score: integer("score").notNull(), // Score from PreTest (0-10)
+    title: text("title").notNull(), // Title based on the score
+  });
+  
+  export const userInitialRelations = relations(userInitial, ({ one }) => ({
+    user: one(userProgress, {
+      fields: [userInitial.userId],
+      references: [userProgress.userId],
+    }),
+  }));
+
+  

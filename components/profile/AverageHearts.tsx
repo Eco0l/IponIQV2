@@ -1,6 +1,7 @@
-"use client"
+"use client";
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, TooltipItem } from 'chart.js';
+import { Heart } from 'lucide-react'; // Import Heart icon from Lucide
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -51,10 +52,16 @@ export const AverageHearts = ({
   };
 
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md w-full max-w-sm">
-      <h2 className="text-xl font-bold mb-2">Average Remaining Hearts per Lesson</h2>
+    <div className="p-6 bg-white rounded-lg shadow-lg w-full max-w-sm">
+      <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+        <Heart className="text-red-500 w-6 h-6" />
+        Average Remaining Hearts per Lesson
+      </h2>
       <Line data={data} options={options} />
-      <p className="mt-2">Average Remaining Hearts: {averageRemainingHearts.toFixed(2)}</p>
+      <p className="mt-4 text-lg text-gray-800">
+        Average Remaining Hearts: 
+        <span className="font-semibold text-blue-600">{averageRemainingHearts.toFixed(2)}</span>
+      </p>
     </div>
   );
 };
