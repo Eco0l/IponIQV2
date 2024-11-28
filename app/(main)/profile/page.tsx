@@ -24,7 +24,7 @@ const ProfilePage = async () => {
   const profile = userProfile.profile as "Student" | "Employee";  // Type assertion to "Student" | "Employee"
 
   // Example: calculate totalHearts based on lessons completed and hearts per lesson
-  const heartsPerLesson = 10; // You can adjust this based on your system
+  const heartsPerLesson = userProgress.hearts; // You can adjust this based on your system
   const totalHearts = courseProgress.lessonsCompleted * heartsPerLesson;
 
   return (

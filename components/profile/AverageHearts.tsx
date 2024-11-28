@@ -23,7 +23,7 @@ export const AverageHearts = ({
     labels: ['Lessons Completed'], // You could extend this for multiple lessons over time
     datasets: [
       {
-        label: 'Average Remaining Hearts per Lesson',
+        label: 'Average Mistakes Per Lesson',
         data: [averageRemainingHearts], // Using the number of remaining hearts per lesson
         borderColor: 'rgba(255, 99, 132, 1)', // Change color to distinguish it
         backgroundColor: 'rgba(255, 99, 132, 0.2)',
@@ -37,7 +37,7 @@ export const AverageHearts = ({
     plugins: {
       title: {
         display: true,
-        text: 'Average Remaining Hearts per Lesson',
+        text: 'Average Mistakes Per Lesson',
       },
       tooltip: {
         callbacks: {
@@ -55,11 +55,11 @@ export const AverageHearts = ({
     <div className="p-6 bg-white rounded-lg shadow-lg w-full max-w-sm">
       <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
         <Heart className="text-red-500 w-6 h-6" />
-        Average Remaining Hearts per Lesson
+        Average Mistakes Per Lesson
       </h2>
       <Line data={data} options={options} />
       <p className="mt-4 text-lg text-gray-800">
-        Average Remaining Hearts: 
+        Mistakes per Lesson:
         <span className="font-semibold text-blue-600">{averageRemainingHearts.toFixed(2)}</span>
       </p>
     </div>
