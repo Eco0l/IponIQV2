@@ -20,27 +20,23 @@ export default function Home() {
         </ClerkLoading>
         <ClerkLoaded>
           <SignedOut>
-            <SignUpButton
-            mode="modal"
-            >
+            <SignUpButton mode="modal" signInForceRedirectUrl="/profiling">
               <Button size="lg" variant="secondary" className="w-full">
                 Get Started
               </Button>
             </SignUpButton>
-            <SignInButton
-            mode="modal"
-            >
+            <SignInButton mode="modal" signUpForceRedirectUrl="/learn">
               <Button size="lg" variant="primaryOutline" className="w-full">
                 I already have an account
               </Button>
             </SignInButton>
           </SignedOut>
           <SignedIn>
-            <Button size="lg"variant="secondary"className="w-full" asChild>
+            <Button size="lg" variant="secondary" className="w-full" asChild>
               <Link href="/learn">
-              Continue Learning
+                Continue Learning
               </Link>
-          </Button>
+            </Button>
           </SignedIn>
         </ClerkLoaded>
       </div>
