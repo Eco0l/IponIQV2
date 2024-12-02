@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { boolean, integer, pgEnum, pgTable, serial, text } from "drizzle-orm/pg-core";
+import { boolean, integer, pgEnum, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
 
 export const courses = pgTable("courses", {
     id: serial("id").primaryKey(),
@@ -138,5 +138,11 @@ export const profiling = pgTable("profiling", {
       references: [userProgress.userId],
     }),
   }));
-
+  export const userHeartsHistory = pgTable("user_hearts_history", {
+    id: serial("id").primaryKey(), // Auto-incrementing ID for each history record
+    userId: text("user_id").references(() => userProgress.userId, { onDelete: "cascade" }).notNull(), // Foreign key to user_progress
+    lessonId: integer("lesson_id").references(() => lessons.id, { onDelete: "cascade" }).notNull(), // Foreign key to lessons table
+    heartsRemaining: integer("hearts_remaining").notNull(), // Remaining hearts after the lesson
+    timestamp: timestamp("timestamp").defaultNow().notNull(), // Time when hearts were updated
+  });
   

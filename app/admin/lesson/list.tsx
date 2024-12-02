@@ -1,8 +1,16 @@
-import { Datagrid, List, TextField, ReferenceField, NumberField } from "react-admin";
+import { Datagrid, List, TextField, ReferenceField, NumberField, TopToolbar, CreateButton } from "react-admin";
+import CsvImporter from "./CsvImporter";  // Import CsvImporter component
+
+const LessonListActions = () => (
+  <TopToolbar>
+    <CreateButton />
+    <CsvImporter />  {/* Add the CsvImporter button here */}
+  </TopToolbar>
+);
 
 export const LessonList = () => {
   return (
-    <List>
+    <List actions={<LessonListActions />}>
       <Datagrid rowClick="edit">
         <TextField source="id" />
         <TextField source="title" />

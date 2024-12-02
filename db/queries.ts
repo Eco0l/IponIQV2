@@ -1,14 +1,16 @@
 import { cache } from "react";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 
 import db from "@/db/drizzle";
 import { 
   challengeProgress,
+  challenges,
   courses, 
   lessons, 
   profiling, 
   units, 
+  userHeartsHistory, 
   userInitial, 
   userProgress,
 } from "@/db/schema";
@@ -291,7 +293,7 @@ export const getProfiling = cache(async () => {
   return data; // Return the profiling data
 });
 
-export const saveUserInitial = cache(async (score: number, title: "Beginner" | "Knowledgeable") => {
+export const saveUserInitial = cache(async (score: number, title: "Beginner" | "Knowledgeable" | "Investment Literate") => {
   const { userId } = await auth();
 
   if (!userId) {
@@ -334,3 +336,87 @@ export const getUserInitial = cache(async () => {
   // Return score and title if found
   return data ? { score: data.score, title: data.title } : null;
 });
+
+export const getTotalChallengesByCourse = cache(async () => {
+  // Fetch challenges and their related course titles
+  const challengesByCourse = await db.query.challenges.findMany({
+    with: {
+      lesson: {
+        with: {
+          unit: {
+            with: {
+              course: true, // Fetch course data to get course titles
+            },
+          },
+        },
+      },
+    },
+    columns: {
+      id: true,
+    },
+  });
+
+  // Create an accumulator to map course titles to challenge counts
+  const totalChallengesByCourse = challengesByCourse.reduce((acc, challenge) => {
+    const course = challenge.lesson?.unit?.course;
+    if (course) {
+      const courseTitle = course.title; // Use course title instead of course ID
+      acc[courseTitle] = (acc[courseTitle] || 0) + 1; // Increment challenge count by course title
+    }
+    return acc;
+  }, {} as Record<string, number>); // Use string keys (course titles) instead of course IDs
+
+  return totalChallengesByCourse;
+});
+
+export const getTotalChallengesOverall = cache(async () => {
+  // Get all challenges, including their associated lessons, units, and courses
+  const challenges = await db.query.challenges.findMany({
+    with: {
+      lesson: {
+        with: {
+          unit: {
+            with: {
+              course: true, // We include course info, but we're not grouping by course
+            },
+          },
+        },
+      },
+    },
+    columns: {
+      id: true, // We're only interested in the challenge ID for counting
+    },
+  });
+
+  // Simply return the total count of challenges
+  const totalChallenges = challenges.length;
+
+  return totalChallenges;
+});
+
+export const getChallengeCompletionPercentage = cache(async (userId: string) => {
+  // Get the total number of challenges
+  const totalChallenges = await db
+    .select()
+    .from(challenges)
+    .then((challengesList) => challengesList.length);
+
+  // Get the number of challenges completed by the user
+  const completedChallenges = await db
+    .select()
+    .from(challengeProgress)
+    .where(and(eq(challengeProgress.userId, userId), eq(challengeProgress.completed, true)))
+    .then((completedList) => completedList.length);
+
+  // Calculate the completion percentage
+  const completionPercentage = totalChallenges > 0 
+    ? (completedChallenges / totalChallenges) * 100 
+    : 0;
+
+  return {
+    completedChallenges,
+    totalChallenges,
+    completionPercentage: parseFloat(completionPercentage.toFixed(2)), // Return up to two decimal places
+  };
+});
+
