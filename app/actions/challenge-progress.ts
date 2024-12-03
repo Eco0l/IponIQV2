@@ -9,11 +9,11 @@ import { getUserProgress } from "@/db/queries";
 import { challengeProgress, challenges, userProgress } from "@/db/schema";
 import { auth } from "@clerk/nextjs/server";
 
-export const upsertChallengeProgress = async (challengeId: number) => {
+export const upsertChallengeProgress = async (challengeId: number): Promise<{ error?: string } | undefined> => {
   const { userId } = await auth();
 
   if (!userId) {
-    throw new Error("Unauthorized"); 
+    throw new Error("Unauthorized");
   }
 
   const currentUserProgress = await getUserProgress();
@@ -23,7 +23,7 @@ export const upsertChallengeProgress = async (challengeId: number) => {
   }
 
   const challenge = await db.query.challenges.findFirst({
-    where: eq(challenges.id, challengeId)
+    where: eq(challenges.id, challengeId),
   });
 
   if (!challenge) {
@@ -41,12 +41,17 @@ export const upsertChallengeProgress = async (challengeId: number) => {
 
   const isPractice = !!existingChallengeProgress;
 
+  if (
+    currentUserProgress.hearts === 0 && 
+    !isPractice 
+  ) {
+    return { error: "hearts" };
+  }
 
   if (isPractice) {
     await db.update(challengeProgress).set({
       completed: true,
-    })
-    .where(
+    }).where(
       eq(challengeProgress.id, existingChallengeProgress.id)
     );
 
@@ -60,7 +65,8 @@ export const upsertChallengeProgress = async (challengeId: number) => {
     revalidatePath("/quests");
     revalidatePath("/leaderboard");
     revalidatePath(`/lesson/${lessonId}`);
-    return;
+
+    return { error: "practice" }; // Explicit return
   }
 
   await db.insert(challengeProgress).values({
@@ -78,4 +84,6 @@ export const upsertChallengeProgress = async (challengeId: number) => {
   revalidatePath("/quests");
   revalidatePath("/leaderboard");
   revalidatePath(`/lesson/${lessonId}`);
+
+  return; // Explicit return
 };

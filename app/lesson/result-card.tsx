@@ -2,10 +2,11 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 type Props = {
-  value: number;
-  variant: "points" | "hearts" | "title"; // Added 'title' variant
+  value?: number | string; // Make value optional
+  variant: "points" | "hearts" | "title"; // 'title' variant
   title?: string; // Optional title prop to pass user title
 };
+
 
 export const ResultCard = ({ value, variant, title }: Props) => {
   // Select the icon based on the variant
@@ -52,14 +53,7 @@ export const ResultCard = ({ value, variant, title }: Props) => {
       {/* Display the user's title with an upward arrow */}
       {title && variant === "title" && (
         <div className="flex items-center text-sm text-neutral-700 mt-2">
-          <span className="font-semibold">{title}</span>
-          <Image
-            src="/arrow-up.svg"
-            alt="Arrow Up"
-            height={16}
-            width={16}
-            className="ml-2"
-          />
+          
         </div>
       )}
     </div>

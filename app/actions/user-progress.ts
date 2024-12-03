@@ -55,7 +55,7 @@ export const upsertUserProgress = async (courseId: number) => {
   redirect("/learn");
 };
 
-export const reduceHearts = async (challengeId: number) => {
+export const reduceHearts = async (challengeId: number): Promise<{ error?: string } | undefined> => {
   const { userId } = await auth();
 
   if (!userId) {
@@ -63,7 +63,6 @@ export const reduceHearts = async (challengeId: number) => {
   }
 
   const currentUserProgress = await getUserProgress();
-  
 
   const challenge = await db.query.challenges.findFirst({
     where: eq(challenges.id, challengeId),
@@ -85,16 +84,17 @@ export const reduceHearts = async (challengeId: number) => {
   const isPractice = !!existingChallengeProgress;
 
   if (isPractice) {
-    return { error: "practice" }; 
+    return { error: "practice" }; // Explicit return
   }
 
   if (!currentUserProgress) {
     throw new Error("User progress not found");
   }
 
-
+  console.log('Current hearts:', currentUserProgress.hearts); // Add this line to check hearts value
   if (currentUserProgress.hearts === 0) {
-    return { error: "hearts" };
+    console.log('No hearts left'); // Check if the logic for 0 hearts is hit
+    return { error: "hearts" }; // This should trigger the modal
   }
 
   await db.update(userProgress).set({
@@ -106,7 +106,10 @@ export const reduceHearts = async (challengeId: number) => {
   revalidatePath("/quests");
   revalidatePath("/leaderboard");
   revalidatePath(`/lesson/${lessonId}`);
+
+  return; // Explicit return
 };
+
 
 export const refillHearts = async () => {
   const currentUserProgress = await getUserProgress();
