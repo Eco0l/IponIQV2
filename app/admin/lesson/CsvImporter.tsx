@@ -33,7 +33,6 @@ const CsvImporter = () => {
         setLoading(false);
 
         if (errors.length) {
-          // Log all errors in detail
           console.error("CSV Parsing Errors:", errors);
           notify("CSV contains errors", { type: "warning" });
           return;
@@ -41,38 +40,32 @@ const CsvImporter = () => {
 
         console.log("Parsed Data:", data);
 
-        // Check if the parsed data matches the expected structure
-        data.forEach((record, index) => {
-          console.log(`Row ${index + 1}:`, record);
-        });
+        // Sort data by `order` field
+        const sortedData = [...data].sort((a, b) => a.order - b.order);
 
         try {
-          // Send data to the server in bulk
-          const responses = await Promise.all(
-            data.map(async (record) => {
-              // Make POST request to API for each lesson
-              const response = await fetch("/api/lessons", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify(record),
-              });
+          // Sequentially process each record
+          for (const record of sortedData) {
+            console.log("Processing record:", record);
 
-              if (!response.ok) {
-                throw new Error(`Failed to import lesson: ${response.statusText}`);
-              }
+            const response = await fetch("/api/lessons", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(record),
+            });
 
-              return response.json(); // Assuming the response contains the created lesson data
-            })
-          );
+            if (!response.ok) {
+              throw new Error(`Failed to import lesson: ${response.statusText}`);
+            }
 
-          // Log the responses from the API
-          console.log("Import Response:", responses);
+            const responseData = await response.json();
+            console.log("Response for record:", responseData);
+          }
 
-          // Success feedback
-          notify("CSV imported successfully", { type: "success" });
-          refresh(); // Refresh the list view after import
+          notify("CSV imported successfully in order", { type: "success" });
+          refresh();
         } catch (error) {
           console.error("Import Error:", error);
           notify("Error importing CSV", { type: "error" });
@@ -96,7 +89,7 @@ const CsvImporter = () => {
         disabled={loading}
         onChange={handleFileUpload}
       />
-      {loading && <p>Importing...</p>} {/* Show loading text */}
+      {loading && <p>Importing...</p>}
     </div>
   );
 };
