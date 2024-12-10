@@ -1,6 +1,6 @@
 
-import { Button } from "@/components/ui/button"
-import { ClerkLoaded, ClerkLoading, SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs"
+
+import { ClerkLoaded, ClerkLoading, SignedIn, SignedOut, UserButton } from "@clerk/nextjs"
 import { Loader } from "lucide-react"
 import Image from "next/image"
 
@@ -24,15 +24,6 @@ export const Header = () => {
                             />
                         </SignedIn>
                         <SignedOut>
-                            <SignInButton 
-                            mode="modal"
-                            
-                            >
-                                <Button size="lg" variant="ghost">
-                                    Login
-                                </Button>
-
-                            </SignInButton>
                                 
                             
                         </SignedOut>

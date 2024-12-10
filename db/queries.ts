@@ -420,3 +420,33 @@ export const getChallengeCompletionPercentage = cache(async (userId: string) => 
   };
 });
 
+
+export const getUserProgressAverages = cache(async () => {
+  const { userId } = await auth();
+
+  if (!userId) {
+    return null; // If the user isn't authenticated, return null
+  }
+
+  // Fetch hearts history
+  const data = await db.query.userHeartsHistory.findMany({
+    where: eq(userHeartsHistory.userId, userId),
+  });
+
+  if (data.length === 0) {
+    return { averageHeartsRemaining: 0, averageMistakes: 0 };
+  }
+
+  // Calculate the averages
+  const totalLessons = data.length;
+  const totalHeartsRemaining = data.reduce((sum, entry) => sum + entry.heartsRemaining, 0);
+  const totalMistakes = data.reduce((sum, entry, index, arr) => {
+    const previousHearts = index > 0 ? arr[index - 1].heartsRemaining : 10; // Default to 10 at the start
+    return sum + (previousHearts - entry.heartsRemaining);
+  }, 0);
+
+  return {
+    averageHeartsRemaining: (totalHeartsRemaining / totalLessons).toFixed(2),
+    averageMistakes: (totalMistakes / totalLessons).toFixed(2),
+  };
+});
