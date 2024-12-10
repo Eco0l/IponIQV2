@@ -1,11 +1,34 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { User, Briefcase } from "lucide-react";
+import { useRouter } from "next/navigation"; // Import useRouter for redirection
 
 const Page = () => {
   const [showKnowledgePrompt, setShowKnowledgePrompt] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter(); // To navigate programmatically
+
+  useEffect(() => {
+    // Check if the user already has a profile or has completed the initial profiling
+    const checkProfile = async () => {
+      try {
+        // Make API call to check if the user profile exists
+        const response = await fetch("/api/check-profile"); // Endpoint to check if a profile exists
+        const data = await response.json();
+
+        if (data.profileExists) {
+          // If profile exists, redirect to /courses
+          router.push("/courses");
+        }
+      } catch (err) {
+        console.error("Error checking profile", err);
+        setError("There was an error checking your profile. Please try again.");
+      }
+    };
+
+    checkProfile();
+  }, [router]);
 
   const handleChoice = async (profile: "Student" | "Employee") => {
     try {
