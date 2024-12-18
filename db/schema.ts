@@ -129,7 +129,7 @@ export const profiling = pgTable("profiling", {
     id: serial("id").primaryKey(), // Primary key for the UserInitial record
     userId: text("user_id").notNull(), // Reference to the user (same as in userProgress table)
     score: integer("score").notNull(), // Score from PreTest (0-10)
-    title: text("title").notNull(), // Title based on the score
+    title: text("title").notNull().default("Beginner"), // Title based on the score
   });
   
   export const userInitialRelations = relations(userInitial, ({ one }) => ({
